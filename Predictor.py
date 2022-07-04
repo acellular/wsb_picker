@@ -22,36 +22,6 @@ def get_tickers(csvfile):
     return tickers
 
 
-def clf_predictions23(X, clf, tickers,y=None, cutoff=0):
-
-    predictions = clf.predict(X)
-    pp = clf.predict_proba(X)
-    #print(pp)
-    if y is not None:
-        score = clf.score(X, y)
-        print('SCORE:::: ', score)
-
-
-    ups = 0
-    ups_wrong = 0
-    for i in range(len(tickers)):
-        #print (predictions[i])
-        if pp[i][0] < cutoff:#HOLY SHIT THAT MAKES IT SO MUCH BETTER
-            ups += 1
-
-            if y is not None:
-                #my own score of up down-->percentage of up that were in fact down
-                if y[i] == 0:
-                    ups_wrong += 1
-                print (tickers[i], ' 0=DOWN, 1=UP, 2=UPMORES+P, 3=UP4*S*P: ',  predictions[i],' Real: ', y[i])
-            else:
-                print (tickers[i], ' 0=DOWN, 1=UP, 2=UPMORES+P, 3=UP4*S*P: ',  predictions[i])
-            print (tickers[i], ' Probabilities: ',  pp[i])
-
-    if y is not None and ups != 0:
-        print ('PRECENT that at least right about moving up: ', str(1-(ups_wrong/ups)), 'NUM UP: ', ups)
-    return pp
-
 def clf_predictions_8_cats(X, clf, tickers, y=None, cutoff=0):
 
     predictions = clf.predict(X)
@@ -80,7 +50,7 @@ def clf_predictions_8_cats(X, clf, tickers, y=None, cutoff=0):
 
     if y is not None and ups != 0:
         print ('Prediction Accuracy: ', str(1-(ups_wrong/ups)), 'NUM UP: ', ups)
-    return pp
+    #return pp
 
 
 def setup_data_categorized(csvfile, rnd, scaler=None):
@@ -88,11 +58,11 @@ def setup_data_categorized(csvfile, rnd, scaler=None):
     with open(csvfile, encoding="utf-8") as f:
         column_names = f.readline().split(',')
         ncols = len(f.readline().split(','))
-        print(ncols)
+        #print(ncols)
     data = np.loadtxt(csvfile, delimiter=',', skiprows=1,
                       usecols=range(2, ncols - 1), encoding="utf-8")
 
-    print(data.shape)
+    print('Data shape: ',data.shape)
     #print(data[:10])
 
     # split into
@@ -142,7 +112,7 @@ def neural_net(X_train, X_test, y_train, y_test, alpha=0.1):
 
     #NEURAL!
     print('neural net start')
-    clf = MLPClassifier(hidden_layer_sizes=(20000), solver='adam', tol=1e-4, random_state=None, alpha=alpha,
+    clf = MLPClassifier(hidden_layer_sizes=(2000, 1000, 500), solver='adam', tol=1e-4, random_state=None, alpha=alpha,
                 verbose=True) #default max_iter = 200
     clf.fit(X_train, y_train)
     score = clf.score(X_test, y_test)
