@@ -43,7 +43,7 @@ def stock_counter_comments(comments, stocks, words, verbose=False):
                     for g in range(len(commentSplit)): 
                         if word == commentSplit[g]:
                             stocks_counter[i][word] += 1
-                            break #TODO--WOULD WORK BETTER TO COUNT ALL??
+                            #break #TODO--WOULD WORK BETTER TO COUNT ALL??
                 #sentiment
                 commentBlob = TextBlob(comments[f])
                 addedPol += commentBlob.sentiment.polarity
