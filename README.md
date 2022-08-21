@@ -6,7 +6,7 @@ Used as a way to teach myself basic web crawling and machine learning.
 
 If you've somehow ended up here from Google: DO NOT USE FOR ACTUALLY PICKING STOCKS! Better data required.
 
-### Dependancies
+### Dependencies
 
 Python >= 3.9
 numpy

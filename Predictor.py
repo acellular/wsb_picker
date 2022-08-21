@@ -56,12 +56,9 @@ def clf_predictions_8_cats(X, clf, tickers, y=None, cutoff=0):
     #return pp
 
 
-def setup_data_categorized(csvfile, rnd, scaler=None):
-                # TODO TRY RELOAD DATA FROM FILE USING BUILT IN NUMPY SHIT
-    with open(csvfile, encoding="utf-8") as f:
-        column_names = f.readline().split(',')
-        ncols = len(f.readline().split(','))
-        #print(ncols)
+def setup_data_categorized(csvfile, rnd, scaler=None, categories=[-10000000,0,10000000]):
+
+    with open(csvfile, encoding="utf-8") as f: ncols = len(f.readline().split(','))
     data = np.loadtxt(csvfile, delimiter=',', skiprows=1,
                       usecols=range(2, ncols - 1), encoding="utf-8")
 
@@ -71,13 +68,12 @@ def setup_data_categorized(csvfile, rnd, scaler=None):
     # split into
     X = data[:, 1:]  # select columns 1 through end, counts
     y = data[:, 0]   # select column 0, whether the stock went up or down
-    #print(y[:10])
-    #print(X[:10])
 
     #categories out of y
-    y = pd.cut(y,[-10000000,-.05,-.02,-.01,0,.01,.02,.05,10000000], labels=False)
+    y = pd.cut(y, categories, labels=False)
     print (f'Cateorized y: {y}')
 
+    #scale
     if scaler is None:
         #scaler = StandardScaler()
         scaler = MinMaxScaler()
@@ -89,7 +85,7 @@ def setup_data_categorized(csvfile, rnd, scaler=None):
 
     # split the data
     from sklearn.model_selection import train_test_split #X IS X_SCALED IF NO SCALER GIVEN!
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=rnd)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=rnd)
     return scaler, X, y, X_train, X_test, y_train, y_test 
 
 
@@ -136,7 +132,7 @@ def print_predicts_csv(csv_file, y, predicts, tickers):
                     text_file.write(','+str(p))
 
 
-
+#testing
 if __name__ == "__main__":
     csv_file_train = 'counts_What--from2021-08-09_to_2021-10-26.csv'
     rnd = random.randint(0, 1000)
@@ -147,18 +143,19 @@ if __name__ == "__main__":
     
 
     #initial learning on split data
-    scaler, X, y, X_train, X_test, y_train, y_test = setup_data_categorized(csv_file_train, rnd)
+    scaler, X, y, X_train, X_test, y_train, y_test = setup_data_categorized(csv_file_train, rnd,
+        categories=[-10000000,-.05,-.02,-.01,0,.01,.02,.05,10000000])
     logReg = log_regress(X_train, X_test, y_train, y_test,C=C)#=2forplainMA-IN, 1 for S
     #nn = neural_net(X_train, X_test, y_train, y_test, alpha=alpha)#=1forplainMA-IN, 1.2 for S, cept .5 when full S data..
-    nn = mlp.batch_train(X_train, X_test, y_train, y_test,
-        batch_size=64, epochs=10, lr=1e-4, hidden_dim=8, verbose=True, weight_decay=0)
+    nn = mlp.batch_train(X_train, X_test, y_train, y_test, batch_size=64, epochs=20, lr=1e-2,
+        hidden_layer_sizes=(10000,1000,500), verbose=True, weight_decay=1e-4)
 
 
     #DUMP
     from joblib import dump, load
-    dump(logReg, str(date.today())+'C'+str(C)+'.joblib')
+    #dump(logReg, str(date.today())+'C'+str(C)+'.joblib')
     #dump(nn, str(date.today())+'alpha'+str(alpha)+'.joblib')
-    dump(scaler, str(date.today())+'scaler.joblib')
+    #dump(scaler, str(date.today())+'scaler.joblib')
     #LOAD
     #scaler = load('2021-11-02-20day4CO-NOVIX-scaler.joblib')
     #logReg = load('2021-11-02-20day4CO-NOVIX-C0.5.joblib')
